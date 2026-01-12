@@ -69,3 +69,34 @@ Cost calculation
 Return book functionality
 Borrow history
 MongoDB data persistence
+
+API Documentation 
+--------------------------------------
+Authentication
+Method	Endpoint	Description
+POST	/auth/signup	Register user
+POST	/auth/login	Login user
+Books
+Method	Endpoint	Description
+GET	/books	Get all books
+GET	/books/seed	Insert books (one time)
+Borrow
+Method	Endpoint	Description
+POST	/borrow	Borrow a book
+GET	/borrow/active/:userId	Get active borrow
+POST	/borrow/return/:id	Return book
+GET	/borrow/history/:userId	Borrow history
+ Security & Validation
+ -----------------------------------------
+
+Passwords are hashed using bcrypt
+
+JWT token used for authentication
+
+Borrow validation:
+
+Only one active borrow allowed
+
+Invalid inputs handled
+
+MongoDB stores all persistent data
