@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Books</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>Available Books</h2>
+
+<div id="activeBorrow"></div>
+<hr>
+<div id="books"></div>
+
+<script>
+const userId = localStorage.getItem("userId");
+
+/* ---------- SHOW ACTIVE BORROW ---------- */
+fetch(`http://localhost:5000/borrow/active/${userId}`)
+.then(res => res.json())
+.then(data => {
+  if (data) {
+    document.getElementById("activeBorrow").innerHTML = `
+      <div class="card">
+        <h3>Active Borrow</h3>
+        <p>Book: ${data.bookTitle}</p>
+        <p>Total Cost: ₹${data.totalCost}</p>
+        <button onclick="returnBook('${data._id}')">Return Book</button>
+      </div>
+    `;
+  }
+});
+
+/* ---------- LOAD BOOKS ---------- */
+fetch("http://localhost:5000/books")
+.then(res => res.json())
+.then(data => {
+  let html = "";
+  data.forEach(book => {
+    html += `
+      <div class="card">
+        <h3>${book.title}</h3>
+        <p>Author: ${book.author}</p>
+        <p>₹${book.pricePerDay} per day</p>
+        <input type="number" id="days-${book._id}" placeholder="Days">
+        <button onclick="borrow('${book.title}', ${book.pricePerDay}, '${book._id}')">
+          Borrow
+        </button>
+      </div>
+    `;
+  });
+  document.getElementById("books").innerHTML = html;
+});
+
+/* ---------- BORROW ---------- */
+function borrow(title, price, id) {
+  const days = document.getElementById("days-" + id).value;
+
+  fetch("http://localhost:5000/borrow", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userId,
+      bookTitle: title,
+      days,
+      price
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.message || "Book borrowed");
+    location.reload();
+  });
+}
+
+/* ---------- RETURN ---------- */
+function returnBook(borrowId) {
+  fetch(`http://localhost:5000/borrow/return/${borrowId}`, {
+    method: "POST"
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert("Book returned. Final amount: ₹" + data.finalAmount);
+    location.reload();
+  });
+}
+</script>
+
+</body>
+</html>
